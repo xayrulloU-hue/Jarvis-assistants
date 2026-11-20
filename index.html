@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071321">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JARVIS">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icon.svg">
+<title>JARVIS</title>
+<style>
+:root{color-scheme:dark;--bg:#06111f;--panel:#0c2034;--line:#183c59;--cyan:#67d9ff;--muted:#8da9bd}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -10%,#123b5b 0,#06111f 55%);color:#eaf7ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.app{max-width:760px;margin:auto;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 4px 12px}
+.brand{font-size:23px;font-weight:800;letter-spacing:4px;color:var(--cyan);text-shadow:0 0 20px #1a9bcf}
+.sub{font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px}
+.pill{border:1px solid #24516e;border-radius:30px;padding:7px 10px;color:#9be8ff;font-size:10px}
+.hero{text-align:center;padding:15px 0 12px}
+.orb{width:116px;height:116px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;border:1px solid #3ebbe8;box-shadow:0 0 22px #087db566,inset 0 0 25px #087db566;background:radial-gradient(circle,#1a5777,#092139 65%,#06111f);position:relative}
+.orb:before,.orb:after{content:"";position:absolute;inset:-9px;border:1px solid #237fa6;border-radius:50%;opacity:.55}.orb:after{inset:-17px;border-color:#1a5576;opacity:.35}
+.orb span{font-size:33px;color:#b8f1ff;text-shadow:0 0 20px #4dd7ff}
+.hero h1{font-size:16px;letter-spacing:3px;margin:0}.hero p{font-size:12px;color:var(--muted);margin:7px 0}
+.chat{flex:1;min-height:220px;overflow:auto;background:#081a2a9c;border:1px solid var(--line);border-radius:18px;padding:13px;margin:10px 0}
+.msg{margin:9px 0;max-width:90%;white-space:pre-wrap;line-height:1.45;font-size:14px}
+.msg .who{font-size:10px;letter-spacing:1px;color:var(--cyan);font-weight:700;margin-bottom:4px}
+.msg.user{margin-left:auto;background:#10334c;border:1px solid #205675;border-radius:15px 15px 3px 15px;padding:10px 12px}
+.msg.ai{background:#0c263b;border:1px solid #173e59;border-radius:3px 15px 15px 15px;padding:10px 12px}
+.composer{display:flex;gap:8px;padding:8px 0 14px}
+input{min-width:0;flex:1;background:#0b2033;border:1px solid #24516e;border-radius:14px;padding:14px;color:white;font-size:16px;outline:none}
+button{border:0;border-radius:14px;background:#087eae;color:white;font-weight:700;padding:0 15px;font-size:14px}
+button:disabled{opacity:.45}
+.mic{width:52px;background:#123a57;border:1px solid #2a7397;font-size:20px}
+.note{text-align:center;color:#68869c;font-size:10px;padding-bottom:10px}
+#toast{color:#ffcc83;text-align:center;font-size:12px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div><div class="brand">J.A.R.V.I.S.</div><div class="sub">PERSONAL AI SYSTEM</div></div><div class="pill">● ONLINE UI</div></header>
+<section class="hero"><div class="orb"><span>✧</span></div><h1>HOW MAY I ASSIST?</h1><p>O'zbekcha · Русский · English</p></section>
+<main class="chat" id="chat" aria-live="polite">
+<div class="msg ai"><div class="who">JARVIS</div>Assalomu alaykum! Men JARVIS. Sizga qanday yordam bera olaman?</div>
+</main>
+<div id="toast"></div>
+<form class="composer" id="form"><button type="button" class="mic" id="mic" aria-label="Ovoz yozish">🎙</button><input id="text" autocomplete="off" placeholder="JARVIS bilan suhbat..." /><button id="send" type="submit">➤</button></form>
+<div class="note">Ovozli yozuv va AI javoblari internet talab qiladi.</div>
+</div>
+<script>
+const chat=document.getElementById('chat'),form=document.getElementById('form'),input=document.getElementById('text'),send=document.getElementById('send'),mic=document.getElementById('mic'),toast=document.getElementById('toast');
+let history=[],busy=false,recorder=null,chunks=[];
+function add(who,text,kind){const el=document.createElement('div');el.className='msg '+kind;const label=document.createElement('div');label.className='who';label.textContent=who;const body=document.createElement('div');body.textContent=text;el.append(label,body);chat.append(el);chat.scrollTop=chat.scrollHeight}
+function say(text){if(!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(text);u.lang=/[А-Яа-яЁё]/.test(text)?'ru-RU':(/[ЎҚҒҲўқғҳ]/.test(text)?'uz-UZ':'en-US');speechSynthesis.cancel();speechSynthesis.speak(u)}
+async function sendText(text){if(!text||busy)return;busy=true;send.disabled=true;add('SIZ',text,'user');history.push({role:'user',content:text});input.value='';toast.textContent='JARVIS o‘ylayapti...';try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:history})});const d=await r.json();if(!r.ok)throw new Error(d.detail||'Server xatosi');const answer=d.reply||'Javob olinmadi.';history.push({role:'assistant',content:answer});add('JARVIS',answer,'ai');say(answer);toast.textContent=''}catch(e){toast.textContent=e.message;add('JARVIS','Ulanishda muammo: '+e.message,'ai')}finally{busy=false;send.disabled=false}}
+form.addEventListener('submit',e=>{e.preventDefault();sendText(input.value.trim())});
+mic.addEventListener('click',async()=>{if(recorder&&recorder.state==='recording'){recorder.stop();mic.textContent='🎙';return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];let mime=MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':(MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'');recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};recorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());toast.textContent='Ovoz matnga aylantirilmoqda...';try{const blob=new Blob(chunks,{type:recorder.mimeType||'audio/mp4'});const fd=new FormData();fd.append('audio',blob,'recording.m4a');const r=await fetch('/api/transcribe',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.detail||'Ovoz aniqlanmadi');toast.textContent='';sendText(d.text)}catch(e){toast.textContent=e.message}};recorder.start();mic.textContent='⏹';toast.textContent='Tinglayapman... Tugatish uchun mikrofonni bosing.'}catch(e){toast.textContent='Mikrofonga ruxsat bering: '+e.message}});
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+</script>
+</body></html>
