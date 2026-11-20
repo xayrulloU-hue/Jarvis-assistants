@@ -1,0 +1,28 @@
+JARVIS iPhone PWA — oson joylashtirish yo'riqnomasi
+
+MUHIM: iPhone bosh ekraniga o'rnatish uchun ilova HTTPS manzilda internetga joylashtirilishi kerak. ZIP faylning o'zi iPhone'ga to'g'ridan-to'g'ri ilova bo'lib o'rnatilmaydi.
+
+1) ZIP arxivni kompyuterda oching.
+2) GitHub hisob yarating va yangi public yoki private repository oching.
+3) Shu papkadagi fayllarni repository'ga yuklang.
+4) Render.com saytida hisob oching; New > Blueprint tanlab repository'ni ulang.
+5) Render OPENAI_API_KEY so'raganda OpenAI API kalitingizni Environment Variable sifatida kiriting. Kalitni HTML/JavaScript ichiga yozmang.
+6) Deploy tugagach Render sizga https://...onrender.com manzil beradi.
+7) iPhone'da Safari orqali shu manzilni oching.
+8) Share tugmasi > Add to Home Screen > Add ni bosing.
+
+API kalitini olish: https://platform.openai.com/api-keys
+OpenAI API to'lovi ChatGPT obunasidan alohida bo'lishi mumkin.
+
+Funksiyalar:
+- Uch tilda matnli suhbat (model javob tilini foydalanuvchi tiliga moslaydi).
+- Mikrofondan audio yozib, serverda transkripsiya qilish.
+- iPhone brauzeridagi mavjud ovoz bilan javob berish.
+- PWA bosh ekran ikonka va ilova ko'rinishi.
+
+Cheklovlar:
+- Birinchi ishga tushish va AI/audio funksiyalari internet talab qiladi.
+- iOS mikrofonga ruxsat so'raydi.
+- Ovoz sintezi iPhone'da mavjud ovozlarga bog'liq.
+- Bu PWA; Siri kabi doimiy fon tinglashi yoki iOS tizimini erkin boshqarish imkoniyati yo'q.
+- Hosting va API ishlatish uchun alohida hisob/to'lov talab qilinishi mumkin.
